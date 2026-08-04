@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+  />
+
+  <title>Student Attendance Dashboard</title>
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+  />
+
+  <style>
+    /* ---------- Global reset ---------- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", Roboto, system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 1rem 0.75rem 2rem;
+      color: #0b2a3e;
+      background: linear-gradient(145deg, #f0f6fb 0%, #e3edf5 100%);
+    }
+
+    .page-wrapper {
+      width: 100%;
+      max-width: 1300px;
+      margin: auto;
+    }
+
+    /* ---------- Header ---------- */
+    .main-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      padding: 0 0.25rem;
+    }
+
+    .main-header h1 {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      color: #0b2a3e;
+      font-size: clamp(1.25rem, 3vw, 1.8rem);
+      font-weight: 700;
+    }
+
+    .main-header h1 i {
+      color: #1f7a9e;
+    }
+
+    .month-selector {
+      height: 42px;
+      padding: 0 0.9rem;
+      border: 1px solid rgba(42, 127, 170, 0.15);
+      border-radius: 24px;
+      outline: none;
+      color: #1a4b62;
+      background: rgba(255, 255, 255, 0.85);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    /* ---------- Top navigation ---------- */
+    .top-navigation {
+      display: flex;
+      gap: 0.45rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+      padding: 0.35rem;
+      border: 1px solid rgba(42, 127, 170, 0.1);
+      border-radius: 40px;
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow: 0 5px 15px rgba(0, 30, 50, 0.04);
+      scrollbar-width: none;
+    }
+
+    .top-navigation::-webkit-scrollbar {
+      display: none;
+    }
+
+    .nav-btn {
+      min-width: max-content;
+      height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      padding: 0 1rem;
+      border: 0;
+      border-radius: 30px;
+      color: #517287;
+      background: transparent;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      color: #1f5775;
+      background: #edf7fb;
+    }
+
+    .nav-btn.active {
+      color: white;
+      background: linear-gradient(135deg, #1c6e8c, #2f98b9);
+      box-shadow: 0 5px 12px rgba(26, 94, 122, 0.2);
+    }
+
+    /* ---------- Main card ---------- */
+    .main-card {
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: 30px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow:
+        0 15px 40px rgba(0, 35, 55, 0.1),
+        0 3px 10px rgba(0, 0, 0, 0.03);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    /* ---------- Page sections ---------- */
+    .dashboard-section {
+      display: none;
+      padding: 1.4rem;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .dashboard-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .section-heading h2 {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #0b2a3e;
+      font-size: 1.15rem;
+    }
+
+    .section-heading h2 i {
+      color: #2a7faa;
+    }
+
+    .section-heading p {
+      margin-top: 0.25rem;
+      color: #7895a4;
+      font-size: 0.76rem;
+    }
+
+    /* ---------- Personal information ---------- */
+    .profile-layout {
+      display: grid;
+      grid-template-columns: 270px 1fr;
+      gap: 1.2rem;
+    }
+
+    .profile-card {
+      padding: 1.3rem;
+      border: 1px solid rgba(42, 127, 170, 0.1);
+      border-radius: 24px;
+      text-align: center;
+      background: #f5faff;
+    }
+
+    .student-avatar {
+      width: 100px;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.8rem;
+      border: 4px solid #d6eaf2;
+      border-radius: 50%;
+      color: white;
+      background: linear-gradient(135deg, #1c6e8c, #2f98b9);
+      font-size: 1.7rem;
+      font-weight: 700;
+      box-shadow: 0 5px 12px rgba(26, 94, 122, 0.18);
+    }
+
+    .profile-card h2 {
+      margin-bottom: 0.3rem;
+      color: #0b2a3e;
+      font-size: 1.15rem;
+    }
+
+    .profile-card p {
+      color: #648395;
+      font-size: 0.78rem;
+    }
+
+    .active-label {
+      display: inline-block;
+      margin-top: 0.8rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 20px;
+      color: #0c6337;
+      background: #d6f0e1;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.8rem;
+    }
+
+    .detail-box {
+      padding: 0.9rem;
+      border: 1px solid rgba(42, 127, 170, 0.1);
+      border-radius: 18px;
+      background: #f5faff;
+    }
+
+    .detail-box span {
+      display: block;
+      margin-bottom: 0.3rem;
+      color: #7895a4;
+      font-size: 0.7rem;
+    }
+
+    .detail-box strong {
+      color: #0b2a3e;
+      font-size: 0.82rem;
+    }
+
+    /* ---------- Summary cards ---------- */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.9rem;
+    }
+
+    .summary-card {
+      padding: 1rem;
+      border: 1px solid rgba(42, 127, 170, 0.1);
+      border-radius: 20px;
+      background: #f5faff;
+    }
+
+    .summary-card i {
+      margin-bottom: 0.55rem;
+      color: #2a7faa;
+      font-size: 1.1rem;
+    }
+
+    .summary-label {
+      color: #7895a4;
+      font-size: 0.72rem;
+    }
+
+    .summary-value {
+      margin-top: 0.25rem;
+      color: #0b2a3e;
+      font-size: 1.3rem;
+      font-weight: 800;
+    }
+
+    .summary-card.present i {
+      color: #55ae7e;
+    }
+
+    .summary-card.absent i {
+      color: #d56c6c;
+    }
+
+    .summary-card.late i {
+      color: #e2a333;
+    }
+
+    .summary-card.percentage i {
+      color: #816bc4;
+    }
+
+    /* ---------- Tables ---------- */
+    .table-scroll {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid rgba(42, 127, 170, 0.1);
+      border-radius: 20px;
+    }
+
+    .attendance-table,
+    .daily-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .attendance-table {
+      min-width: 800px;
+    }
+
+    .daily-table {
+      min-width: 970px;
+    }
+
+    .attendance-table thead,
+    .daily-table thead {
+      color: white;
+      background: linear-gradient(135deg, #1c6e8c, #2f98b9);
+    }
+
+    .attendance-table th,
+    .daily-table th {
+      padding: 0.9rem 0.8rem;
+      font-size: 0.74rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .attendance-table th i,
+    .daily-table th i {
+      margin-right: 4px;
+      font-size: 0.7rem;
+    }
+
+    .attendance-table td,
+    .daily-table td {
+      padding: 0.8rem;
+      border-bottom: 1px solid rgba(42, 127, 170, 0.08);
+      color: #315f73;
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    .attendance-table tbody tr:hover,
+    .daily-table tbody tr:hover {
+      background: #f3faff;
+    }
+
+    .subject-name {
+      color: #0b2a3e;
+      font-weight: 700;
+    }
+
+    .percentage,
+    .status-badge {
+      display: inline-block;
+      min-width: 60px;
+      padding: 0.25rem 0.55rem;
+      border-radius: 20px;
+      text-align: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
+    .percentage.good,
+    .status-badge.present {
+      color: #0c6337;
+      background: #d6f0e1;
+    }
+
+    .percentage.warning,
+    .status-badge.late {
+      color: #a7650d;
+      background: #fef0d9;
+    }
+
+    .percentage.danger,
+    .status-badge.absent {
+      color: #a13f3f;
+      background: #f7dede;
+    }
+
+    /* ---------- Buttons ---------- */
+    .export-btn {
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0 0.9rem;
+      border: 1px solid rgba(42, 127, 170, 0.18);
+      border-radius: 22px;
+      color: #1a5775;
+      background: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .export-btn:hover {
+      border-color: #2a7faa;
+      background: #f5faff;
+    }
+
+    /* ---------- Information box ---------- */
+    .notice-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      margin-top: 1rem;
+      padding: 0.9rem;
+      border-radius: 17px;
+      color: #315f73;
+      background: #e3f0f7;
+      font-size: 0.78rem;
+      line-height: 1.5;
+    }
+
+    .notice-box i {
+      margin-top: 2px;
+      color: #2a7faa;
+    }
+
+    .footer-info {
+      margin-top: 1.2rem;
+      color: #7895a4;
+      font-size: 0.75rem;
+      text-align: center;
+    }
+
+    /* ---------- Responsive design ---------- */
+    @media (max-width: 1050px) {
+      .summary-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 750px) {
+      .profile-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .profile-card {
+        text-align: center;
+      }
+
+      .top-navigation {
+        border-radius: 18px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 0.6rem;
+      }
+
+      .main-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .month-selector {
+        width: 100%;
+      }
+
+      .dashboard-section {
+        padding: 1rem;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .section-heading {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .export-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .details-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-btn {
+        padding: 0 0.75rem;
+        font-size: 0.72rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page-wrapper">
+
+    <!-- Header -->
+    <header class="main-header">
+      <h1>
+        <i class="fas fa-chart-line"></i>
+        Student Attendance Dashboard
+      </h1>
+
+      <select class="month-selector" id="monthSelector">
+        <option value="July 2026">July 2026</option>
+        <option value="June 2026">June 2026</option>
+        <option value="May 2026">May 2026</option>
+      </select>
+    </header>
+
+    <!-- Top selection navigation -->
+    <nav class="top-navigation">
+      <button class="nav-btn active" data-target="personalSection">
+        <i class="fas fa-user"></i>
+        Personal data
+      </button>
+
+      <button class="nav-btn" data-target="dailySection">
+        <i class="fas fa-calendar-day"></i>
+        Daily attendance
+      </button>
+
+      <button class="nav-btn" data-target="subjectSection">
+        <i class="fas fa-book-open"></i>
+        Subject-wise attendance
+      </button>
+
+      <button class="nav-btn" data-target="summarySection">
+        <i class="fas fa-chart-pie"></i>
+        Summary
+      </button>
+    </nav>
+
+    <section class="main-card">
+
+      <!-- Personal data section -->
+      <section class="dashboard-section active" id="personalSection">
+        <div class="section-heading">
+          <div>
+            <h2>
+              <i class="fas fa-user-graduate"></i>
+              Personal student information
+            </h2>
+
+            <p>
+              Complete personal, academic, and contact details.
+            </p>
+          </div>
+        </div>
+
+        <div class="profile-layout">
+          <div class="profile-card">
+            <div class="student-avatar">AS</div>
+
+            <h2>Arjun Sharma</h2>
+
+            <p>Student ID: STU-10024</p>
+            <p>B.Tech Computer Science</p>
+            <p>Year 2 · CSE-A</p>
+
+            <span class="active-label">
+              <i class="fas fa-circle-check"></i>
+              Active student
+            </span>
+          </div>
+
+          <div class="details-grid">
+            <div class="detail-box">
+              <span>Full name</span>
+              <strong>Arjun Sharma</strong>
+            </div>
+
+            <div class="detail-box">
+              <span>Date of birth</span>
+              <strong>14 August 2005</strong>
+            </div>
+
+            <div class="detail-box">
+              <span>Gender</span>
+              <strong>Male</strong>
+            </div>
+
+            <div class="detail-box">
+              <span>Category</span>
+              <strong>General</strong>
+            </div>
+
+            <div class="detail-box">
+              <span>University / College</span>
+              <strong>Anna University</strong>
+            </div>
+
+            <div class="detail-box">
+              <span>Department</span>
+              <strong>Computer Science Engineering</strong>
+            </div>
+
+            <div class="detail-box">
+              <span>Year and section</span>
+              <strong>Second Year · CSE-A</strong>
+            </div>
+
+            <div class="detail-box">
+              <span>Roll number</span>
+              <strong>CS2024-024</strong>
+            </div>
+
+            <div class="detail-box">
+              <span>Email address</span>
+              <strong>arjun.sharma@student.edu</strong>
+            </div>
+
+            <div class="detail-box">
+              <span>Mobile number</span>
+              <strong>+91 98765 43210</strong>
+            </div>
+
+            <div class="detail-box">
+              <span>Parent / Guardian</span>
+              <strong>Ramesh Sharma</strong>
+            </div>
+
+            <div class="detail-box">
+              <span>Guardian contact</span>
+              <strong>+91 98765 43211</strong>
+            </div>
+
+            <div class="detail-box">
+              <span>Address</span>
+              <strong>Chennai, Tamil Nadu</strong>
+            </div>
+
+            <div class="detail-box">
+              <span>Admission year</span>
+              <strong>2024</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Daily attendance section -->
+      <section class="dashboard-section" id="dailySection">
+        <div class="section-heading">
+          <div>
+            <h2>
+              <i class="fas fa-calendar-check"></i>
+              Daily attendance
+            </h2>
+
+            <p>
+              Subject attendance status for every working day in the selected month.
+            </p>
+          </div>
+
+          <button class="export-btn" id="dailyExportBtn">
+            <i class="fas fa-file-csv"></i>
+            Export daily report
+          </button>
+        </div>
+
+        <div class="table-scroll">
+          <table class="daily-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Day</th>
+                <th>Mathematics</th>
+                <th>Data Structures</th>
+                <th>DBMS</th>
+                <th>Computer Networks</th>
+                <th>Operating Systems</th>
+                <th>Total present</th>
+                <th>Total absent</th>
+              </tr>
+            </thead>
+
+            <tbody id="dailyTableBody">
+              <!-- Generated using JavaScript -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="notice-box">
+          <i class="fas fa-circle-info"></i>
+
+          <span>
+            Present and late classes are counted as attended classes.
+            Sundays are excluded from the monthly attendance calculation.
+          </span>
+        </div>
+      </section>
+
+      <!-- Subject-wise attendance section -->
+      <section class="dashboard-section" id="subjectSection">
+        <div class="section-heading">
+          <div>
+            <h2>
+              <i class="fas fa-book-open"></i>
+              Subject-wise attendance
+            </h2>
+
+            <p>
+              Attendance details for every subject during the selected month.
+            </p>
+          </div>
+
+          <button class="export-btn" id="subjectExportBtn">
+            <i class="fas fa-file-csv"></i>
+            Export subject report
+          </button>
+        </div>
+
+        <div class="table-scroll">
+          <table class="attendance-table">
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Total classes</th>
+                <th>Total present</th>
+                <th>Total absent</th>
+                <th>Total late</th>
+                <th>Attendance percentage</th>
+                <th>Attendance status</th>
+              </tr>
+            </thead>
+
+            <tbody id="subjectTableBody">
+              <!-- Generated using JavaScript -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="notice-box">
+          <i class="fas fa-triangle-exclamation"></i>
+
+          <span>
+            Students with attendance below 75% may require academic
+            counseling or additional attendance monitoring.
+          </span>
+        </div>
+      </section>
+
+      <!-- Summary section -->
+      <section class="dashboard-section" id="summarySection">
+        <div class="section-heading">
+          <div>
+            <h2>
+              <i class="fas fa-chart-pie"></i>
+              Attendance summary
+            </h2>
+
+            <p>
+              Overall attendance performance for the selected month.
+            </p>
+          </div>
+
+          <button class="export-btn" id="summaryExportBtn">
+            <i class="fas fa-download"></i>
+            Download summary
+          </button>
+        </div>
+
+        <div class="summary-grid">
+          <div class="summary-card">
+            <i class="fas fa-calendar-days"></i>
+            <div class="summary-label">Total classes</div>
+            <div class="summary-value" id="totalClasses">0</div>
+          </div>
+
+          <div class="summary-card present">
+            <i class="fas fa-user-check"></i>
+            <div class="summary-label">Total present</div>
+            <div class="summary-value" id="totalPresent">0</div>
+          </div>
+
+          <div class="summary-card absent">
+            <i class="fas fa-user-xmark"></i>
+            <div class="summary-label">Total absent</div>
+            <div class="summary-value" id="totalAbsent">0</div>
+          </div>
+
+          <div class="summary-card late">
+            <i class="fas fa-clock"></i>
+            <div class="summary-label">Total late</div>
+            <div class="summary-value" id="totalLate">0</div>
+          </div>
+
+          <div class="summary-card percentage">
+            <i class="fas fa-percent"></i>
+            <div class="summary-label">Overall percentage</div>
+            <div class="summary-value" id="overallPercentage">0%</div>
+          </div>
+        </div>
+
+        <div class="notice-box">
+          <i class="fas fa-circle-info"></i>
+
+          <span id="summaryMessage">
+            Attendance summary will be displayed here.
+          </span>
+        </div>
+      </section>
+    </section>
+
+    <div class="footer-info">
+      <i class="fas fa-shield-halved"></i>
+      Confidential student attendance report
+    </div>
+  </main>
+
+  <script>
+    const subjects = [
+      "Mathematics",
+      "Data Structures",
+      "DBMS",
+      "Computer Networks",
+      "Operating Systems"
+    ];
+
+    const sections = document.querySelectorAll(".dashboard-section");
+    const navButtons = document.querySelectorAll(".nav-btn");
+
+    const dailyTableBody =
+      document.getElementById("dailyTableBody");
+
+    const subjectTableBody =
+      document.getElementById("subjectTableBody");
+
+    const monthSelector =
+      document.getElementById("monthSelector");
+
+    let dailyAttendance = [];
+
+    /* ---------- Navigation ---------- */
+    navButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const targetId = button.dataset.target;
+
+        navButtons.forEach((item) => {
+          item.classList.remove("active");
+        });
+
+        sections.forEach((section) => {
+          section.classList.remove("active");
+        });
+
+        button.classList.add("active");
+        document.getElementById(targetId).classList.add("active");
+
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth"
+        });
+      });
+    });
+
+    /* ---------- Attendance data ---------- */
+    function randomStatus() {
+      const random = Math.random();
+
+      if (random < 0.78) {
+        return "Present";
+      }
+
+      if (random < 0.92) {
+        return "Absent";
+      }
+
+      return "Late";
+    }
+
+    function getStatusClass(status) {
+      return status.toLowerCase();
+    }
+
+    function getPercentageClass(percentage) {
+      if (percentage >= 75) {
+        return "good";
+      }
+
+      if (percentage >= 60) {
+        return "warning";
+      }
+
+      return "danger";
+    }
+
+    function formatDate(date) {
+      return date.toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      });
+    }
+
+    function createDailyAttendance() {
+      dailyAttendance = [];
+
+      // July 2026
+      const year = 2026;
+      const month = 6;
+
+      const numberOfDays =
+        new Date(year, month + 1, 0).getDate();
+
+      for (let day = 1; day <= numberOfDays; day++) {
+        const date = new Date(year, month, day);
+
+        // Skip Sundays
+        if (date.getDay() === 0) {
+          continue;
+        }
+
+        const attendance = {};
+
+        subjects.forEach((subject) => {
+          attendance[subject] = randomStatus();
+        });
+
+        dailyAttendance.push({
+          date: formatDate(date),
+          day: date.toLocaleDateString("en-IN", {
+            weekday: "short"
+          }),
+          attendance
+        });
+      }
+    }
+
+    function calculateSubjectSummary() {
+      return subjects.map((subject) => {
+        let present = 0;
+        let absent = 0;
+        let late = 0;
+
+        dailyAttendance.forEach((record) => {
+          const status = record.attendance[subject];
+
+          if (status === "Present") {
+            present++;
+          }
+
+          if (status === "Absent") {
+            absent++;
+          }
+
+          if (status === "Late") {
+            late++;
+          }
+        });
+
+        const totalClasses = present + absent + late;
+
+        // Late is counted as attended
+        const percentage = Math.round(
+          ((present + late) / totalClasses) * 100
+        );
+
+        return {
+          subject,
+          totalClasses,
+          present,
+          absent,
+          late,
+          percentage
+        };
+      });
+    }
+
+    /* ---------- Render daily attendance ---------- */
+    function renderDailyAttendance() {
+      dailyTableBody.innerHTML = "";
+
+      dailyAttendance.forEach((record) => {
+        let totalPresent = 0;
+        let totalAbsent = 0;
+
+        const subjectCells = subjects.map((subject) => {
+          const status = record.attendance[subject];
+
+          if (status === "Present" || status === "Late") {
+            totalPresent++;
+          }
+
+          if (status === "Absent") {
+            totalAbsent++;
+          }
+
+          return `
+            <td>
+              <span class="status-badge ${getStatusClass(status)}">
+                ${status}
+              </span>
+            </td>
+          `;
+        }).join("");
+
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+          <td>${record.date}</td>
+          <td>${record.day}</td>
+          ${subjectCells}
+          <td>${totalPresent}</td>
+          <td>${totalAbsent}</td>
+        `;
+
+        dailyTableBody.appendChild(row);
+      });
+    }
+
+    /* ---------- Render subject attendance ---------- */
+    function renderSubjectAttendance() {
+      const summary = calculateSubjectSummary();
+
+      subjectTableBody.innerHTML = "";
+
+      summary.forEach((item) => {
+        const attendanceStatus =
+          item.percentage >= 75
+            ? "Good"
+            : "Below 75%";
+
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+          <td>
+            <span class="subject-name">
+              ${item.subject}
+            </span>
+          </td>
+
+          <td>${item.totalClasses}</td>
+          <td>${item.present}</td>
+          <td>${item.absent}</td>
+          <td>${item.late}</td>
+
+          <td>
+            <span class="percentage ${getPercentageClass(item.percentage)}">
+              ${item.percentage}%
+            </span>
+          </td>
+
+          <td>
+            <span class="percentage ${getPercentageClass(item.percentage)}">
+              ${attendanceStatus}
+            </span>
+          </td>
+        `;
+
+        subjectTableBody.appendChild(row);
+      });
+
+      updateSummary(summary);
+    }
+
+    /* ---------- Render overall summary ---------- */
+    function updateSummary(summary) {
+      let totalClasses = 0;
+      let totalPresent = 0;
+      let totalAbsent = 0;
+      let totalLate = 0;
+
+      summary.forEach((item) => {
+        totalClasses += item.totalClasses;
+        totalPresent += item.present;
+        totalAbsent += item.absent;
+        totalLate += item.late;
+      });
+
+      const overallPercentage = Math.round(
+        ((totalPresent + totalLate) / totalClasses) * 100
+      );
+
+      document.getElementById("totalClasses").textContent =
+        totalClasses;
+
+      document.getElementById("totalPresent").textContent =
+        totalPresent;
+
+      document.getElementById("totalAbsent").textContent =
+        totalAbsent;
+
+      document.getElementById("totalLate").textContent =
+        totalLate;
+
+      document.getElementById("overallPercentage").textContent =
+        `${overallPercentage}%`;
+
+      const summaryMessage =
+        document.getElementById("summaryMessage");
+
+      if (overallPercentage >= 75) {
+        summaryMessage.textContent =
+          `Arjun Sharma has ${overallPercentage}% attendance for the selected month. The attendance is above the minimum requirement of 75%.`;
+      } else {
+        summaryMessage.textContent =
+          `Arjun Sharma has ${overallPercentage}% attendance for the selected month. Additional attendance improvement is required.`;
+      }
+    }
+
+    /* ---------- Export report ---------- */
+    function exportReport() {
+      const summary = calculateSubjectSummary();
+
+      const rows = [
+        [
+          "Student Name",
+          "Arjun Sharma"
+        ],
+        [
+          "Student ID",
+          "STU-10024"
+        ],
+        [
+          "Selected Month",
+          monthSelector.value
+        ],
+        [],
+        [
+          "Subject",
+          "Total Classes",
+          "Present",
+          "Absent",
+          "Late",
+          "Percentage"
+        ]
+      ];
+
+      summary.forEach((item) => {
+        rows.push([
+          item.subject,
+          item.totalClasses,
+          item.present,
+          item.absent,
+          item.late,
+          `${item.percentage}%`
+        ]);
+      });
+
+      rows.push([]);
+      rows.push([
+        "Date",
+        "Day",
+        ...subjects,
+        "Total Present",
+        "Total Absent"
+      ]);
+
+      dailyAttendance.forEach((record) => {
+        let present = 0;
+        let absent = 0;
+
+        const statusValues = subjects.map((subject) => {
+          const status = record.attendance[subject];
+
+          if (status === "Present" || status === "Late") {
+            present++;
+          }
+
+          if (status === "Absent") {
+            absent++;
+          }
+
+          return status;
+        });
+
+        rows.push([
+          record.date,
+          record.day,
+          ...statusValues,
+          present,
+          absent
+        ]);
+      });
+
+      const csv = rows
+        .map((row) => row.join(","))
+        .join("\n");
+
+      const blob = new Blob([csv], {
+        type: "text/csv;charset=utf-8;"
+      });
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = "arjun-sharma-attendance-report.csv";
+      link.click();
+
+      URL.revokeObjectURL(url);
+    }
+
+    document
+      .getElementById("dailyExportBtn")
+      .addEventListener("click", exportReport);
+
+    document
+      .getElementById("subjectExportBtn")
+      .addEventListener("click", exportReport);
+
+    document
+      .getElementById("summaryExportBtn")
+      .addEventListener("click", exportReport);
+
+    monthSelector.addEventListener("change", () => {
+      alert(
+        `Attendance page selected for ${monthSelector.value}.`
+      );
+    });
+
+    /* ---------- Initial page loading ---------- */
+    createDailyAttendance();
+    renderDailyAttendance();
+    renderSubjectAttendance();
+  </script>
+</body>
+</html>
